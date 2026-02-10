@@ -1,0 +1,44 @@
+<h1>Inventory System</h1>
+{% if messages %}
+
+    {% for message in messages %}
+<p style="color:green">{{ message }}</p>
+
+    {% endfor %}
+
+{% endif %}
+ 
+<form method="GET">
+<input type="text" name="search" placeholder="Search product">
+<button type="submit">Search</button>
+</form>
+<a href="/cart/">View Cart</a>
+<h3>Categories</h3>
+<ul>
+
+{% for c in categories %}
+<li>
+<a href="/category/{{ c.id }}/">{{ c.name }}</a>
+</li>
+
+{% endfor %}
+</ul>
+
+
+{% if products %}
+<h3>Search Results</h3>
+<ul>
+
+{% for p in products %}
+<li>
+
+        {{ p.name }} - {{ p.price }}
+<a href="/product/{{ p.id }}/">View</a>
+<a href="/add-to-cart/{{ p.id }}/">Add to Cart</a>
+</li>
+
+{% endfor %}
+</ul>
+
+{% endif %}
+ 
