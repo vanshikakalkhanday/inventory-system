@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from .models import Product, Category
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
  
 # SHOW ALL PRODUCTS
 
@@ -32,6 +33,7 @@ def product_by_category(request, id):
     })
 
 # ADD NEW PRODUCT (CREATE)
+@staff_member_required
 def add_product(request):
     if request.method == "POST":
         name = request.POST['name']
@@ -53,7 +55,7 @@ def add_product(request):
     return render(request, 'inventory/add_product.html', {'categories': categories})
 
 # EDIT PRODUCT (UPDATE)
-
+@staff_member_required
 def edit_product(request, id):
     product = get_object_or_404(Product, id=id)
     if request.method == "POST":
@@ -71,7 +73,7 @@ def edit_product(request, id):
     })
 
 # DELETE PRODUCT
-
+@staff_member_required
 def delete_product(request, id):
     product = get_object_or_404(Product, id=id)
     product.delete()

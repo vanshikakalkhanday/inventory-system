@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from .models import Category, Product
-
+from django.contrib.auth.models import User
 
 class CategoryModelTest(TestCase):
 
@@ -91,7 +91,15 @@ class AddProductViewTest(TestCase):
     def setUp(self):
         self.category = Category.objects.create(name="Electronics")
 
-    def test_add_product(self):
+        self.admin_user = User.objects.create_user(
+            username="admin",
+            password="adminpass123",
+            is_staff=True
+        )
+
+    def test_admin_can_add_product(self):
+        self.client.login(username="admin", password="adminpass123")
+
         response = self.client.post(reverse('add_product'), {
             'name': 'TV',
             'description': 'Smart TV',
@@ -100,6 +108,56 @@ class AddProductViewTest(TestCase):
             'category': self.category.id
         })
 
-        self.assertEqual(response.status_code, 302)  # redirect
+        self.assertEqual(response.status_code, 302)
         self.assertEqual(Product.objects.count(), 1)
-        self.assertEqual(Product.objects.first().name, 'TV')        
+        self.assertEqual(Product.objects.first().name, 'TV')  
+
+
+class AddProductPermissionTest(TestCase):
+
+    def setUp(self):
+        self.category = Category.objects.create(name="Electronics")
+
+        self.user = User.objects.create_user(
+            username="user",
+            password="userpass123"
+        )
+
+    def test_non_admin_cannot_add_product(self):
+        self.client.login(username="user", password="userpass123")
+
+        response = self.client.post(reverse('add_product'), {
+            'name': 'TV',
+            'description': 'Smart TV',
+            'price': 30000,
+            'quantity': 3,
+            'category': self.category.id
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Product.objects.count(), 0)
+        self.assertIn('/admin/login/', response.url)  
+
+class AddProductAdminAccessTest(TestCase):
+
+    def setUp(self):
+        self.category = Category.objects.create(name="Electronics")
+        self.admin_user = User.objects.create_user(
+            username="admin",
+            password="adminpass123",
+            is_staff=True
+        )
+
+    def test_admin_can_add_product(self):
+        self.client.login(username="admin", password="adminpass123")
+
+        response = self.client.post(reverse('add_product'), {
+            'name': 'Tablet',
+            'description': 'Android Tablet',
+            'price': 15000,
+            'quantity': 5,
+            'category': self.category.id
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Product.objects.count(), 1)          
