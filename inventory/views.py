@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Product, Category
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from decimal import Decimal, InvalidOperation
  
 # SHOW ALL PRODUCTS
 
@@ -36,23 +37,51 @@ def product_by_category(request, id):
 @staff_member_required
 def add_product(request):
     if request.method == "POST":
-        name = request.POST['name']
-        description = request.POST['description']
-        price = request.POST['price']
-        quantity = request.POST['quantity']
-        category_id = request.POST['category']
-        category = Category.objects.get(id=category_id)
+        name = request.POST.get("name")
+        description = request.POST.get("description")
+        price_raw = request.POST.get("price")
+        quantity_raw = request.POST.get("quantity")
+        category_id = request.POST.get("category")
+        if not category_id:
+            messages.error(request, "Please select a category.")
+            return redirect("add_product")
+        try:
+            category = Category.objects.get(id=category_id)
+        except Category.DoesNotExist:
+            messages.error(request, "Invalid category selected.")
+            return redirect("add_product")
+        if not price_raw:
+            messages.error(request, "Price is required.")
+            return redirect("add_product")
+        try:
+            price = Decimal(price_raw)
+            if price < 0:
+                raise ValueError
+        except (InvalidOperation, ValueError):
+            messages.error(request, "Please enter a valid price.")
+            return redirect("add_product")
+        if not quantity_raw:
+            messages.error(request, "Quantity is required.")
+            return redirect("add_product")
+        try:
+            quantity = int(quantity_raw)
+            if quantity < 0:
+                raise ValueError
+        except ValueError:
+            messages.error(request, "Please enter a valid quantity.")
+            return redirect("add_product")
         Product.objects.create(
             name=name,
             description=description,
             price=price,
             quantity=quantity,
-            category=category
-
+            category=category,
         )
-        return redirect('product_list')
+        messages.success(request, "Product added successfully.")
+        return redirect("product_list")
     categories = Category.objects.all()
-    return render(request, 'inventory/add_product.html', {'categories': categories})
+    return render(request, "inventory/add_product.html", {"categories": categories})
+
 
 # EDIT PRODUCT (UPDATE)
 @staff_member_required
