@@ -1,5 +1,4 @@
 from django.urls import path
-
 from . import views
 
 urlpatterns = [
@@ -23,8 +22,4 @@ urlpatterns = [
     path('update-cart/<int:id>/', views.update_cart, name='update_cart'),
 
     path('remove-from-cart/<int:id>/', views.remove_from_cart, name='remove_from_cart'),
- 
- 
-
 ]
- 

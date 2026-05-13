@@ -42,43 +42,51 @@ def add_product(request):
         price_raw = request.POST.get("price")
         quantity_raw = request.POST.get("quantity")
         category_id = request.POST.get("category")
+
+        # Basic validation
+        if not name or not description:
+            messages.error(request, "Name and Description are required.")
+            return redirect("add_product")
+
         if not category_id:
             messages.error(request, "Please select a category.")
             return redirect("add_product")
+
         try:
             category = Category.objects.get(id=category_id)
         except Category.DoesNotExist:
             messages.error(request, "Invalid category selected.")
             return redirect("add_product")
-        if not price_raw:
-            messages.error(request, "Price is required.")
-            return redirect("add_product")
+
+        # Price validation
         try:
             price = Decimal(price_raw)
             if price < 0:
                 raise ValueError
-        except (InvalidOperation, ValueError):
-            messages.error(request, "Please enter a valid price.")
+        except:
+            messages.error(request, "Invalid price.")
             return redirect("add_product")
-        if not quantity_raw:
-            messages.error(request, "Quantity is required.")
-            return redirect("add_product")
+
+        # Quantity validation
         try:
             quantity = int(quantity_raw)
             if quantity < 0:
                 raise ValueError
-        except ValueError:
-            messages.error(request, "Please enter a valid quantity.")
+        except:
+            messages.error(request, "Invalid quantity.")
             return redirect("add_product")
+
         Product.objects.create(
             name=name,
             description=description,
             price=price,
             quantity=quantity,
-            category=category,
+            category=category
         )
+
         messages.success(request, "Product added successfully.")
         return redirect("product_list")
+
     categories = Category.objects.all()
     return render(request, "inventory/add_product.html", {"categories": categories})
 
@@ -109,50 +117,68 @@ def delete_product(request, id):
     return redirect('product_list')
 # add to cart 
 def add_to_cart(request, id):
-    product = Product.objects.get(id=id)
+    product = get_object_or_404(Product, id=id)
+
     cart = request.session.get('cart', {})
+
     if str(product.id) in cart:
         cart[str(product.id)] += 1
     else:
         cart[str(product.id)] = 1
+
     request.session['cart'] = cart
     messages.success(request, "Product added to cart successfully!")
-    return redirect('product_list') 
 
+    return redirect('product_list')
+# view
 def view_cart(request):
+    cart = request.session.get('cart', {})
 
-    cart = request.session.get('cart', {})   
     if not isinstance(cart, dict):
         cart = {}
-        request.session['cart'] = cart
+
     products = []
     total = 0
+
     for id, qty in cart.items():
-        product = Product.objects.get(id=id)
+        try:
+            product = Product.objects.get(id=id)
+        except Product.DoesNotExist:
+            continue
+
         product.qty = qty
         product.subtotal = product.price * qty
         total += product.subtotal
         products.append(product)
+
     return render(request, 'inventory/cart.html', {
         'products': products,
         'total': total
     })
-   
+
+ #update  
 def update_cart(request, id):
     if request.method == "POST":
-        qty = int(request.POST['qty'])
+        try:
+            qty = int(request.POST['qty'])
+            if qty < 1:
+                qty = 1
+        except:
+            qty = 1
+
         cart = request.session.get('cart', {})
+
         if str(id) in cart:
             cart[str(id)] = qty
+
         request.session['cart'] = cart
+
     return redirect('view_cart')
+
 
 def remove_from_cart(request, id):
     cart = request.session.get('cart', {})
     if str(id) in cart:
         del cart[str(id)]
     request.session['cart'] = cart
-    return redirect('view_cart')
-  
-
- 
+    return redirect('view_cart') 

@@ -2,39 +2,40 @@
 
 {% if products %}
 <table border="1">
-<tr>
-<th>Name</th>
-<th>Price</th>
-<th>Quantity</th>
-<th>Subtotal</th>
-<th>Action</th>
-</tr>
+    <tr>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Subtotal</th>
+        <th>Action</th>
+    </tr>
 
-{% for p in products %}
-<tr>
-<td>{{ p.name }}</td>
-<td>{{ p.price }}</td>
-<td>
-<form action="/update-cart/{{ p.id }}/" method="POST">
+    {% for p in products %}
+    <tr>
+        <td>{{ p.name }}</td>
+        <td>{{ p.price }}</td>
 
-            {% csrf_token %}
-<input type="number" name="qty" value="{{ p.qty }}" min="1">
-<button type="submit">Update</button>
-</form>
-</td>
-<td>{{ p.subtotal }}</td>
-<td>
-<a href="/remove-from-cart/{{ p.id }}/">Remove</a>
-</td>
-</tr>
+        <td>
+            <form action="{% url 'update_cart' p.id %}" method="POST">
+                {% csrf_token %}
+                <input type="number" name="qty" value="{{ p.qty }}" min="1">
+                <button type="submit">Update</button>
+            </form>
+        </td>
 
-{% endfor %}
+        <td>{{ p.subtotal }}</td>
+
+        <td>
+            <a href="{% url 'remove_from_cart' p.id %}">Remove</a>
+        </td>
+    </tr>
+    {% endfor %}
 </table>
+
 <h3>Total: {{ total }}</h3>
 
 {% else %}
 <h3>No products found in cart</h3>
-
 {% endif %}
-<a href="/">Back to Home</a>
- 
+
+<a href="{% url 'product_list' %}">Back to Home</a>
