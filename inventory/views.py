@@ -9,14 +9,29 @@ from decimal import Decimal, InvalidOperation
 
 def product_list(request):
     query = request.GET.get('search')
+    category_id = request.GET.get('category')
+
     products = Product.objects.all()
+
     if query:
-        products = Product.objects.filter(name__icontains=query)
+        products = products.filter(name__icontains=query)
+
+    if category_id:
+        products = products.filter(category_id=category_id)
+
     categories = Category.objects.all()
+
+    selected_category = None
+    if category_id:
+        selected_category = Category.objects.filter(id=category_id).first()
+
     return render(request, 'inventory/product_list.html', {
         'products': products,
-        'categories': categories
+        'categories': categories,
+        'selected_category': selected_category
     })
+
+   
  
 # SHOW PRODUCT BY ID
 def product_detail(request, id):
@@ -28,10 +43,30 @@ def product_by_category(request, id):
     category = get_object_or_404(Category, id=id)
     products = Product.objects.filter(category=category)
     categories = Category.objects.all()
+
     return render(request, 'inventory/product_list.html', {
         'products': products,
-        'categories': categories
+        'categories': categories,
+        'selected_category': category
     })
+
+
+# add category
+@staff_member_required
+def add_category(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+
+        if not name:
+            messages.error(request, "Category name is required.")
+            return redirect("add_category")
+
+        Category.objects.create(name=name)
+        messages.success(request, "Category added successfully.")
+        return redirect("product_list")
+
+    return render(request, "inventory/add_category.html")
+
 
 # ADD NEW PRODUCT (CREATE)
 @staff_member_required
@@ -95,19 +130,41 @@ def add_product(request):
 @staff_member_required
 def edit_product(request, id):
     product = get_object_or_404(Product, id=id)
+
     if request.method == "POST":
-        product.name = request.POST['name']
-        product.description = request.POST['description']
-        product.price = request.POST['price']
-        product.quantity = request.POST['quantity']
-        product.category = Category.objects.get(id=request.POST['category'])
-        product.save()
-        return redirect('product_list')
+        try:
+            name = request.POST.get("name")
+            description = request.POST.get("description")
+            price = Decimal(request.POST.get("price"))
+            quantity = int(request.POST.get("quantity"))
+            category = Category.objects.get(id=request.POST.get("category"))
+
+            if not name or not description:
+                raise ValueError
+
+            if price < 0 or quantity < 0:
+                raise ValueError
+
+            product.name = name
+            product.description = description
+            product.price = price
+            product.quantity = quantity
+            product.category = category
+            product.save()
+
+            messages.success(request, "Product updated successfully.")
+            return redirect("product_list")
+
+        except:
+            messages.error(request, "Invalid data provided.")
+            return redirect("edit_product", id=id)
+
     categories = Category.objects.all()
-    return render(request, 'inventory/edit_product.html', {
-        'product': product,
-        'categories': categories
+    return render(request, "inventory/edit_product.html", {
+        "product": product,
+        "categories": categories
     })
+
 
 # DELETE PRODUCT
 @staff_member_required

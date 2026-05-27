@@ -1,0 +1,9 @@
+<h1>Add Category</h1>
+
+<form method="POST">
+    {% csrf_token %}
+    <input type="text" name="name" placeholder="Category name" required>
+    <button type="submit">Add</button>
+</form>
+
+{% url 'product_list' %}Back</a>

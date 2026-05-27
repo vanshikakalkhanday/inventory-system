@@ -112,7 +112,6 @@ class AddProductViewTest(TestCase):
         self.assertEqual(Product.objects.count(), 1)
         self.assertEqual(Product.objects.first().name, 'TV')  
 
-
 class AddProductPermissionTest(TestCase):
 
     def setUp(self):

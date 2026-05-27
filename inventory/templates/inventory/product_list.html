@@ -7,7 +7,7 @@
 {% endif %}
 
 <form method="GET">
-    <input type="text" name="search" placeholder="Search product">
+    <input type="text" name="search" placeholder="Search product" value="{{ request.GET.search }}">
     <button type="submit">Search</button>
 </form>
 
@@ -16,21 +16,33 @@
 <a href="{% url 'view_cart' %}">View Cart</a>
 
 {% if request.user.is_staff %}
+
     | <a href="{% url 'add_product' %}">Add Product</a>
+
+    | <a href="{% url 'add_category' %}">Add Category</a>
+
 {% endif %}
+ 
+
 
 <hr>
 
 <h3>Categories</h3>
-<ul>
+
+<ol>
     {% for c in categories %}
         <li>
-            <a href="{% url 'product_by_category' c.id %}">
-                {{ c.name }}
-            </a>
+            {% if selected_category and c.id == selected_category.id %}
+                <strong>{{ c.name }}</strong>
+            {% else %}
+                <a href="?category={{ c.id }}">
+                    {{ c.name }}
+                </a>
+            {% endif %}
         </li>
     {% endfor %}
-</ul>
+</ol>
+
 
 <hr>
 
@@ -38,32 +50,31 @@
     <h3>
         {% if request.GET.search %}
             Search Results
+        {% elif selected_category %}
+            {{ selected_category.name }} Products
         {% else %}
             All Products
         {% endif %}
     </h3>
 
-    <ul>
-        {% for p in products %}
-            <li>
-                {{ p.name }} - {{ p.price }}
+<ul>
+   {% for p in products %}
+<li>
+<strong>{{ p.name }}</strong> - ₹{{ p.price }}
+<!-- View -->
+<a href="{% url 'product_detail' p.id %}">View</a>
+<!-- Add to Cart -->
+<a href="{% url 'add_to_cart' p.id %}">Add to Cart</a>
+           {% if request.user.is_staff %}
+<!-- Edit -->
+               | <a href="{% url 'edit_product' p.id %}">Edit</a>
+<!-- Delete -->
+               | <a href="{% url 'delete_product' p.id %}">Delete</a>
+           {% endif %}
+</li>
+   {% endfor %}
+</ul>
 
-                <!-- View -->
-                <a href="{% url 'product_detail' p.id %}">View</a>
-
-                <!-- Add to Cart -->
-                | <a href="{% url 'add_to_cart' p.id %}">Add to Cart</a>
-
-                {% if request.user.is_staff %}
-                    <!-- Edit -->
-                    | <a href="{% url 'edit_product' p.id %}">Edit</a>
-
-                    <!-- Delete -->
-                    | <a href="{% url 'delete_product' p.id %}">Delete</a>
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
 
 {% else %}
     <p>No products found.</p>
