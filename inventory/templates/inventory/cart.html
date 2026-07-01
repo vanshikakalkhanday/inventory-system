@@ -1,41 +1,142 @@
 <h1>Your Cart</h1>
+<style>
+    body {
+
+        font-family: Arial, sans-serif;
+
+    }
+    h1 {
+
+        color: #333;
+
+    }
+    table {
+
+        border-collapse: collapse;
+
+        width: 70%;
+
+        margin-top: 20px;
+
+    }
+    th, td {
+
+        border: 1px solid #ccc;
+
+        padding: 12px;
+
+        text-align: center;
+
+    }
+    th {
+
+        background-color: #f2f2f2;
+
+    }
+    a {
+
+        text-decoration: none;
+
+    }
+    .btn {
+
+        padding: 8px 14px;
+
+        border-radius: 6px;
+
+        border: none;
+
+        color: white;
+
+        cursor: pointer;
+
+        font-size: 14px;
+
+    }
+    .update {
+
+        background-color: #3498db;
+
+    }
+    .remove {
+
+        background-color: #e74c3c;
+
+    }
+    .back {
+
+        background-color: #2ecc71;
+
+        display: inline-block;
+
+        margin-top: 15px;
+
+    }
+    input {
+
+        width: 60px;
+
+        padding: 5px;
+
+    }
+</style>
 
 {% if products %}
-<table border="1">
-    <tr>
-        <th>Name</th>
-        <th>Price</th>
-        <th>Quantity</th>
-        <th>Subtotal</th>
-        <th>Action</th>
-    </tr>
+<table>
+<tr>
+<th>Name</th>
+<th>Price</th>
+<th>Quantity</th>
+<th>Subtotal</th>
+<th>Action</th>
+</tr>
 
-    {% for p in products %}
-    <tr>
-        <td>{{ p.name }}</td>
-        <td>{{ p.price }}</td>
+{% for p in products %}
+<tr>
+<td>{{ p.name }}</td>
+<td>₹{{ p.price }}</td>
 
-        <td>
-            <form action="{% url 'update_cart' p.id %}" method="POST">
-                {% csrf_token %}
-                <input type="number" name="qty" value="{{ p.qty }}" min="1">
-                <button type="submit">Update</button>
-            </form>
-        </td>
+<td>
+<form action="{% url 'update_cart' p.id %}" method="POST">
 
-        <td>{{ p.subtotal }}</td>
+{% csrf_token %}
+<input type="number" name="qty" value="{{ p.qty }}" min="1">
+<button class="btn update" type="submit">
 
-        <td>
-            <a href="{% url 'remove_from_cart' p.id %}">Remove</a>
-        </td>
-    </tr>
-    {% endfor %}
+Update
+</button>
+</form>
+</td>
+
+<td>
+
+₹{{ p.subtotal }}
+</td>
+
+<td>
+<a href="{% url 'remove_from_cart' p.id %}" 
+
+class="btn remove">
+
+Remove
+</a>
+</td>
+
+</tr>
+
+{% endfor %}
+
 </table>
 
-<h3>Total: {{ total }}</h3>
+<h3>Total: ₹{{ total }}</h3>
 
 {% else %}
 <h3>No products found in cart</h3>
+
 {% endif %}
 
-<a href="{% url 'product_list' %}">Back to Home</a>
+<a href="{% url 'product_list' %}" class="btn back">
+
+Back to Home
+</a>
+ 

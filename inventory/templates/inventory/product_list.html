@@ -1,81 +1,142 @@
 <h1>Inventory System</h1>
-
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin: 30px;
+}
+a{
+    text-decoration: none;
+}
+.btn{
+    display:inline-block;
+    padding:7px 14px;
+    border-radius:6px;
+    color:white;
+    margin:4px;
+    font-size:14px;
+}
+.search-btn{
+    background:#2563eb;
+    border:none;
+    color:white;
+    padding:7px 15px;
+    border-radius:6px;
+}
+.add-btn{
+    background:#16a34a;
+}
+.category-btn{
+    background:#7c3aed;
+}
+.cart-btn{
+    background:#2563eb;
+}
+.view-btn{
+    background:#2563eb;
+}
+.cart-product-btn{
+    background:#16a34a;
+}
+.edit-btn{
+    background:#f59e0b;
+}
+.delete-btn{
+    background:#dc2626;
+}
+.product-box{
+    background:#f3f4f6;
+    padding:15px;
+    margin:12px 0;
+    border-radius:10px;
+    list-style:none;
+}
+</style>
 {% if messages %}
-    {% for message in messages %}
-        <p style="color: green;">{{ message }}</p>
-    {% endfor %}
+{% for message in messages %}
+<p style="color:green;">
+{{message}}
+</p>
+{% endfor %}
 {% endif %}
-
 <form method="GET">
-    <input type="text" name="search" placeholder="Search product" value="{{ request.GET.search }}">
-    <button type="submit">Search</button>
+<input type="text"
+name="search"
+placeholder="Search product"
+value="{{request.GET.search}}">
+<button class="search-btn">
+Search
+</button>
 </form>
-
 <br>
-
-<a href="{% url 'view_cart' %}">View Cart</a>
-
+<a class="btn cart-btn"
+href="{% url 'view_cart' %}">
+View Cart
+</a>
 {% if request.user.is_staff %}
-
-    | <a href="{% url 'add_product' %}">Add Product</a>
-
-    | <a href="{% url 'add_category' %}">Add Category</a>
-
+<a class="btn add-btn"
+href="{% url 'add_product' %}">
+Add Product
+</a>
+<a class="btn category-btn"
+href="{% url 'add_category' %}">
+Add Category
+</a>
 {% endif %}
- 
-
-
 <hr>
-
-<h3>Categories</h3>
-
-<ol>
-    {% for c in categories %}
-        <li>
-            {% if selected_category and c.id == selected_category.id %}
-                <strong>{{ c.name }}</strong>
-            {% else %}
-                <a href="?category={{ c.id }}">
-                    {{ c.name }}
-                </a>
-            {% endif %}
-        </li>
-    {% endfor %}
-</ol>
-
-
-<hr>
-
-{% if products %}
-    <h3>
-        {% if request.GET.search %}
-            Search Results
-        {% elif selected_category %}
-            {{ selected_category.name }} Products
-        {% else %}
-            All Products
-        {% endif %}
-    </h3>
-
+<h2>Categories</h2>
 <ul>
-   {% for p in products %}
+{% for c in categories %}
 <li>
-<strong>{{ p.name }}</strong> - ₹{{ p.price }}
-<!-- View -->
-<a href="{% url 'product_detail' p.id %}">View</a>
-<!-- Add to Cart -->
-<a href="{% url 'add_to_cart' p.id %}">Add to Cart</a>
-           {% if request.user.is_staff %}
-<!-- Edit -->
-               | <a href="{% url 'edit_product' p.id %}">Edit</a>
-<!-- Delete -->
-               | <a href="{% url 'delete_product' p.id %}">Delete</a>
-           {% endif %}
-</li>
-   {% endfor %}
-</ul>
-
-
+{% if selected_category and c.id == selected_category.id %}
+<strong>{{c.name}}</strong>
 {% else %}
-    <p>No products found.</p>
+<a href="?category={{c.id}}">
+{{c.name}}
+</a>
 {% endif %}
+{% if request.user.is_staff %}
+<a class="btn delete-btn"
+href="{% url 'delete_category' c.id %}"
+onclick="return confirm('Delete category?')">
+Delete
+</a>
+{% endif %}
+</li>
+{% endfor %}
+</ul>
+<hr>
+<h2>All Products</h2>
+<ul>
+{% for p in products %}
+<li class="product-box">
+<strong>
+{{p.name}}
+</strong>
+<br>
+₹{{p.price}}
+<br><br>
+<a class="btn view-btn"
+href="{% url 'product_detail' p.id %}">
+View
+</a>
+<a class="btn cart-product-btn"
+href="{% url 'add_to_cart' p.id %}">
+Add to Cart
+</a>
+{% if request.user.is_staff %}
+<a class="btn edit-btn"
+href="{% url 'edit_product' p.id %}">
+Edit
+</a>
+<a class="btn delete-btn"
+href="{% url 'delete_product' p.id %}"
+onclick="return confirm('Delete product?')">
+Delete
+</a>
+{% endif %}
+</li>
+{% empty %}
+<p>No products found.</p>
+{% endfor %}
+</ul>
+ 
