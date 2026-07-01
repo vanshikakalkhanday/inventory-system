@@ -1,4 +1,18 @@
 <h1>Your Cart</h1>
+{% if messages %}
+    {% for message in messages %}
+<div style="
+            background:#dc3545;
+            color:white;
+            padding:10px;
+            margin:10px 0;
+            border-radius:5px;
+        ">
+            {{ message }}
+</div>
+    {% endfor %}
+{% endif %}
+ 
 <style>
     body {
 

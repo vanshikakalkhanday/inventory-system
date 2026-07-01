@@ -215,20 +215,28 @@ def delete_category(request, id):
     category.delete()
     return redirect('product_list')
 # add to cart 
+from django.contrib import messages
+
+from django.shortcuts import get_object_or_404, redirect
+
 def add_to_cart(request, id):
     product = get_object_or_404(Product, id=id)
-
     cart = request.session.get('cart', {})
-
+    current_qty = cart.get(str(product.id), 0)
+    if current_qty >= product.quantity:
+        messages.error(
+            request,
+            f"Only {product.quantity} item(s) available in stock!"
+        )
+        return redirect('product_list')
     if str(product.id) in cart:
         cart[str(product.id)] += 1
     else:
         cart[str(product.id)] = 1
-
     request.session['cart'] = cart
     messages.success(request, "Product added to cart successfully!")
-
     return redirect('product_list')
+ 
 # view
 def view_cart(request):
     cart = request.session.get('cart', {})
@@ -255,24 +263,26 @@ def view_cart(request):
         'total': total
     })
 
- #update  
+# update cart quantity
 def update_cart(request, id):
-    if request.method == "POST":
-        try:
-            qty = int(request.POST['qty'])
-            if qty < 1:
-                qty = 1
-        except:
-            qty = 1
+   product = get_object_or_404(Product, id=id)
+   qty = int(request.POST.get('qty'))
+   if qty > product.quantity:
+       messages.error(
+           request,
+           f"Only {product.quantity} items available in stock"
+       )
+       return redirect('view_cart')
+   if qty <= 0:
+       messages.error(request, "Quantity must be greater than 0")
+       return redirect('view_cart')
 
-        cart = request.session.get('cart', {})
+   cart = request.session.get('cart', {})
+   cart[str(id)] = qty
+   request.session['cart'] = cart
 
-        if str(id) in cart:
-            cart[str(id)] = qty
-
-        request.session['cart'] = cart
-
-    return redirect('view_cart')
+   messages.success(request, "Cart updated")
+   return redirect('view_cart')
 
 
 def remove_from_cart(request, id):
