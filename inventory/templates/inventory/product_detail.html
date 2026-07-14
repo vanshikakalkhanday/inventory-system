@@ -1,7 +1,45 @@
-<h2>{{ product.name }}</h2>
-<p>{{ product.description }}</p>
-<p>Price: {{ product.price }}</p>
-<p>Quantity: {{ product.quantity }}</p>
-<p>Category: {{ product.category.name }}</p>
-<a href="/">Back</a>
+<h1>Product Details</h1>
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin:40px;
+}
+
+.detail-box{
+    background:#f3f4f6;
+    padding:25px;
+    border-radius:12px;
+    width:400px;
+}
+
+.back-btn{
+    display:inline-block;
+    background:#2563eb;
+    color:white;
+    padding:8px 18px;
+    border-radius:6px;
+    text-decoration:none;
+}
+</style>
+<div class="detail-box">
+<h2>
+{{ product.name }}
+</h2>
+<p>
+{{ product.description }}
+</p>
+<p>
+<b>Price:</b> ₹{{ product.price }}
+</p>
+<p>
+<b>Quantity:</b> {{ product.quantity }}
+</p>
+<p>
+<b>Category:</b> {{ product.category.name }}
+</p>
+<br>
+<a class="back-btn" href="/">
+Back
+</a>
+</div>
  

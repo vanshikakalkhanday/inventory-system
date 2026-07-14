@@ -1,0 +1,82 @@
+<h1>Add Category</h1>
+<style>
+body{
+
+font-family:Arial,sans-serif;
+
+}
+
+input{
+
+padding:10px;
+
+width:300px;
+
+border-radius:5px;
+
+border:1px solid #ccc;
+
+}
+
+.btn{
+
+padding:9px 18px;
+
+border:none;
+
+border-radius:6px;
+
+color:white;
+
+text-decoration:none;
+
+cursor:pointer;
+
+}
+
+.add{
+
+background:#3498db;
+
+}
+
+.back{
+
+background:#2ecc71;
+
+}
+
+.error{
+
+color:red;
+
+margin:10px 0;
+
+}
+</style>
+
+{% if messages %}
+
+{% for message in messages %}
+<div class="error">
+
+{{ message }}
+</div>
+{% endfor %}
+{% endif %}
+<form method="POST">
+{% csrf_token %}
+<input 
+type="text"
+name="name"
+placeholder="Category name"
+required>
+<br><br>
+<button class="btn add" type="submit">
+Add
+</button>
+<a href="{% url 'product_list' %}" class="btn back">
+Back
+</a>
+</form>
+ 
